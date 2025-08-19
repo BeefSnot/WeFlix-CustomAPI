@@ -1,10 +1,14 @@
 // seed.js
 // This script connects to the database, wipes it clean, and populates it with initial data.
 
+require('dotenv').config();
+const bcrypt = require('bcrypt');
 const sequelize = require('./db');
 const Film = require('./models/film');
 const Person = require('./models/person');
 const Planet = require('./models/planet');
+const Movie = require('./models/Movie');
+const User = require('./models/User');
 
 const seedDatabase = async () => {
     try {
@@ -35,6 +39,26 @@ const seedDatabase = async () => {
             release_date: '2005-05-19'
         });
         console.log('🎬 Film created!');
+
+        // --- CREATE USERS ---
+        await User.create({
+            username: 'tester',
+            passwordHash: await bcrypt.hash('force', 10),
+            role: 'user'
+        });
+
+        await User.create({
+            username: 'admin',
+            passwordHash: await bcrypt.hash('adminpass', 10),
+            role: 'admin'
+        });
+
+        // --- CREATE MOVIES ---
+        await Movie.bulkCreate([
+            { title: 'A New Hope', year: 1977, genre: 'Sci-Fi', rating: 8.6, description: 'Episode IV' },
+            { title: 'The Empire Strikes Back', year: 1980, genre: 'Sci-Fi', rating: 8.8, description: 'Episode V' },
+            { title: 'Return of the Jedi', year: 1983, genre: 'Sci-Fi', rating: 8.3, description: 'Episode VI' }
+        ]);
 
         console.log('✅ Seeding complete! 🌱');
 

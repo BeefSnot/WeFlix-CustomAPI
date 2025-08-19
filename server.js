@@ -1,17 +1,34 @@
 // server.js
-// This is the main entry point for the WeFlix API.
+// Main entry point for the WeFlix API.
 
 const express = require('express');
 const sequelize = require('./db');
 const Film = require('./models/film');
 const Person = require('./models/person');
 const Planet = require('./models/planet');
+// Swagger (auto-generated API docs)
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+
+// -------- Swagger Setup --------
+// Only initialize once; ensures /api/docs serves interactive UI.
+const swaggerSpec = swaggerJsdoc({
+    definition: {
+        openapi: '3.0.0',
+        info: { title: 'WeFlix API', version: '1.0.0', description: 'Movies API with pagination & auth (extensible).' }
+    },
+    // We could later move endpoint JSDoc annotations into separate route files.
+    apis: [__filename] // parse this file for @openapi blocks
+});
+app.get('/api/docs.json', (req, res) => res.json(swaggerSpec));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+console.log('Swagger docs mounted at /api/docs');
 
 // --- API ENDPOINTS ---
 
@@ -20,6 +37,16 @@ app.get('/', (req, res) => {
     res.send('Welcome to the WeFlix API for Star Wars!');
 });
 
+/**
+ * @openapi
+ * /api/films:
+ *   get:
+ *     summary: List all films
+ *     tags: [Films]
+ *     responses:
+ *       200:
+ *         description: Array of film objects
+ */
 // GET all films
 app.get('/api/films', async (req, res) => {
     try {
@@ -31,6 +58,16 @@ app.get('/api/films', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /api/people:
+ *   get:
+ *     summary: List all people with their homeworld
+ *     tags: [People]
+ *     responses:
+ *       200:
+ *         description: Array of people
+ */
 // GET all people
 app.get('/api/people', async (req, res) => {
     try {
