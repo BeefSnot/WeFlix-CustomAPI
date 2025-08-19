@@ -1,7 +1,7 @@
 const express = require('express');
 const Movie = require('../models/Movie');
-const cache = require('../middleware/cache');
-const auth = require('../middleware/auth');
+const cache = require('../src/middleware/cache');
+const auth = require('../src/middleware/auth');
 const router = express.Router();
 
 /**

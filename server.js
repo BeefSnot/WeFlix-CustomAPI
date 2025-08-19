@@ -6,6 +6,11 @@ const sequelize = require('./db');
 const Film = require('./models/film');
 const Person = require('./models/person');
 const Planet = require('./models/planet');
+// Routers
+const authRouter = require('./routes/auth');
+const moviesRouter = require('./routes/movies');
+// Custom middleware
+const requestLogger = require('./src/middleware/logger');
 // Swagger (auto-generated API docs)
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
@@ -15,17 +20,56 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+app.use(requestLogger);
 
 // -------- Swagger Setup --------
 // Only initialize once; ensures /api/docs serves interactive UI.
 const swaggerSpec = swaggerJsdoc({
     definition: {
         openapi: '3.0.0',
-        info: { title: 'WeFlix API', version: '1.0.0', description: 'Movies API with pagination & auth (extensible).' }
+        info: { title: 'WeFlix API', version: '1.0.0', description: 'Movies API with pagination & auth (extensible).' },
+        components: {
+            schemas: {
+                Movie: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'integer' },
+                        title: { type: 'string' },
+                        year: { type: 'integer' },
+                        genre: { type: 'string' },
+                        description: { type: 'string' },
+                        rating: { type: 'number', format: 'float' }
+                    }
+                },
+                AuthRequest: {
+                    type: 'object',
+                    required: ['username','password'],
+                    properties: {
+                        username: { type: 'string' },
+                        password: { type: 'string' }
+                    }
+                },
+                AuthResponse: {
+                    type: 'object',
+                    properties: { token: { type: 'string' } }
+                },
+                Error: {
+                    type: 'object',
+                    properties: { message: { type: 'string' } }
+                }
+            }
+        },
+        tags: [
+            { name: 'Films', description: 'Legacy Star Wars film data' },
+            { name: 'People', description: 'Star Wars characters' },
+            { name: 'Movies', description: 'WeFlix movies CRUD' },
+            { name: 'Auth', description: 'Authentication' }
+        ]
     },
-    // We could later move endpoint JSDoc annotations into separate route files.
-    apis: [__filename] // parse this file for @openapi blocks
+    // Use relative globs (cross-platform) for route annotation discovery.
+    apis: ['./server.js', './routes/*.js']
 });
+console.log('Swagger discovered path keys:', Object.keys(swaggerSpec.paths || {}));
 app.get('/api/docs.json', (req, res) => res.json(swaggerSpec));
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 console.log('Swagger docs mounted at /api/docs');
@@ -36,6 +80,10 @@ console.log('Swagger docs mounted at /api/docs');
 app.get('/', (req, res) => {
     res.send('Welcome to the WeFlix API for Star Wars!');
 });
+
+// Mount feature routers
+app.use('/api/auth', authRouter);
+app.use('/api/movies', moviesRouter);
 
 /**
  * @openapi
