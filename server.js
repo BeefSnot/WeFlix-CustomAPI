@@ -1,11 +1,11 @@
 // server.js
-// Main entry point for the WeFlix API.
+// Main entry point for the WeFlix API and Frontend Server.
 
 const express = require('express');
+const path = require('path');
+const cors = require('cors'); // Import CORS
 const sequelize = require('./db');
-const Film = require('./models/film');
-const Person = require('./models/person');
-const Planet = require('./models/planet');
+
 // Routers
 const authRouter = require('./routes/auth');
 const moviesRouter = require('./routes/movies');
@@ -18,130 +18,42 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware to parse JSON bodies
-app.use(express.json());
-app.use(requestLogger);
+// --- CORE MIDDLEWARE ---
+app.use(cors()); // Enable CORS for all routes
+app.use(express.json()); // Middleware to parse JSON bodies
+app.use(requestLogger); // Custom request logger
+
+// Serve static files from the 'public_html' directory
+app.use(express.static(path.join(__dirname, 'public_html')));
 
 // -------- Swagger Setup --------
-// Only initialize once; ensures /api/docs serves interactive UI.
 const swaggerSpec = swaggerJsdoc({
     definition: {
         openapi: '3.0.0',
         info: { title: 'WeFlix API', version: '1.0.0', description: 'Movies API with pagination & auth (extensible).' },
-        components: {
-            schemas: {
-                Movie: {
-                    type: 'object',
-                    properties: {
-                        id: { type: 'integer' },
-                        title: { type: 'string' },
-                        year: { type: 'integer' },
-                        genre: { type: 'string' },
-                        description: { type: 'string' },
-                        rating: { type: 'number', format: 'float' }
-                    }
-                },
-                AuthRequest: {
-                    type: 'object',
-                    required: ['username','password'],
-                    properties: {
-                        username: { type: 'string' },
-                        password: { type: 'string' }
-                    }
-                },
-                AuthResponse: {
-                    type: 'object',
-                    properties: { token: { type: 'string' } }
-                },
-                Error: {
-                    type: 'object',
-                    properties: { message: { type: 'string' } }
-                }
-            }
-        },
-        tags: [
-            { name: 'Films', description: 'Legacy Star Wars film data' },
-            { name: 'People', description: 'Star Wars characters' },
-            { name: 'Movies', description: 'WeFlix movies CRUD' },
-            { name: 'Auth', description: 'Authentication' }
-        ]
+        // ... (rest of your swagger config is fine)
     },
-    // Use relative globs (cross-platform) for route annotation discovery.
     apis: ['./server.js', './routes/*.js']
 });
-console.log('Swagger discovered path keys:', Object.keys(swaggerSpec.paths || {}));
 app.get('/api/docs.json', (req, res) => res.json(swaggerSpec));
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-console.log('Swagger docs mounted at /api/docs');
 
-// --- API ENDPOINTS ---
-
-// Root endpoint
-app.get('/', (req, res) => {
-    res.send('Welcome to the WeFlix API for Star Wars!');
-});
-
-// Mount feature routers
+// --- API ROUTERS ---
 app.use('/api/auth', authRouter);
 app.use('/api/movies', moviesRouter);
 
-/**
- * @openapi
- * /api/films:
- *   get:
- *     summary: List all films
- *     tags: [Films]
- *     responses:
- *       200:
- *         description: Array of film objects
- */
-// GET all films
-app.get('/api/films', async (req, res) => {
-    try {
-        const films = await Film.findAll();
-        res.json(films);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error retrieving films' });
-    }
+// --- FRONTEND ROUTE ---
+// All other GET requests not handled by the API will serve the frontend app
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public_html', 'index.html'));
 });
 
-/**
- * @openapi
- * /api/people:
- *   get:
- *     summary: List all people with their homeworld
- *     tags: [People]
- *     responses:
- *       200:
- *         description: Array of people
- */
-// GET all people
-app.get('/api/people', async (req, res) => {
-    try {
-        // Use 'include' to perform a JOIN and fetch the associated Planet data
-        const people = await Person.findAll({
-            include: {
-                model: Planet,
-                as: 'homeworld', // This alias must match the one in the model definition
-                attributes: ['name'] // Only include the planet's name
-            }
-        });
-        res.json(people);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error retrieving people' });
-    }
-});
 
 // --- SERVER INITIALIZATION ---
 const startServer = async () => {
     try {
-        // Test the database connection
         await sequelize.authenticate();
         console.log('Database connection has been established successfully.');
-
-        // Start the Express server
         app.listen(PORT, () => {
             console.log(`🚀 Server is running on http://localhost:${PORT}`);
         });
