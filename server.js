@@ -23,9 +23,6 @@ app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(requestLogger); // Custom request logger
 
-// Serve static files from the 'public_html' directory
-app.use(express.static(path.join(__dirname, 'public_html')));
-
 // -------- Swagger Setup --------
 const swaggerSpec = swaggerJsdoc({
     definition: {
@@ -42,24 +39,34 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/auth', authRouter);
 app.use('/api/movies', moviesRouter);
 
-// --- FRONTEND ROUTE ---
-// All other GET requests not handled by the API will serve the frontend app
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public_html', 'index.html'));
-});
+// Health FIRST (move above any catch-all)
+app.get('/__health', (req, res) => res.json({ ok: true }));
 
+// Optional: later add frontend catch-all; TEMP remove to keep API simple
+// app.get('*', (...));
 
-// --- SERVER INITIALIZATION ---
-const startServer = async () => {
-    try {
-        await sequelize.authenticate();
-        console.log('Database connection has been established successfully.');
-        app.listen(PORT, () => {
-            console.log(`🚀 Server is running on http://localhost:${PORT}`);
-        });
-    } catch (error) {
-        console.error('Unable to connect to the database:', error);
-    }
-};
+// DB init (define BEFORE usage)
+async function initDatabase() {
+  try {
+    await sequelize.authenticate();
+    console.log('[WeFlix] DB connected');
+  } catch (e) {
+    console.error('[WeFlix] DB connect failed', e);
+  }
+}
 
-startServer();
+// Export app
+module.exports = app;
+
+// Local dev (only when run directly and not under Unit)
+if (require.main === module && !process.env.UNIT) {
+  (async () => {
+    await initDatabase();
+    app.listen(PORT, () => console.log(`[WeFlix] Dev listening http://localhost:${PORT}`));
+  })();
+}
+
+// NGINX Unit (UNIT=1): just init DB (Unit binds the socket)
+if (process.env.UNIT) {
+  initDatabase();
+}
