@@ -8,17 +8,17 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
-<body class="bg-black text-white font-['Inter'] overflow-hidden">
+<body class="bg-black text-white font-['Inter'] overflow-x-hidden">
 
     <div id="app-container" class="opacity-0 transition-opacity duration-1000">
         <!-- Header -->
         <header class="fixed top-0 left-0 right-0 z-50 p-4 md:p-6 flex justify-between items-center transition-all duration-300">
-            <h1 class="weflix-logo text-2xl md:text-3xl font-black tracking-wider uppercase">WEFLIX</h1>
-            <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-300">
-                <a href="#" class="hover:text-white transition-colors">Home</a>
-                <a href="#" class="hover:text-white transition-colors">Data Streams</a>
-                <a href="#" class="hover:text-white transition-colors">Archives</a>
-                <a href="#" class="hover:text-white transition-colors">New & Popular</a>
+            <a href="/" class="weflix-logo text-2xl md:text-3xl font-black tracking-wider uppercase no-underline">WEFLIX</a>
+            <nav class="hidden md:flex items-center space-x-2 text-sm font-medium text-gray-300">
+                <a href="#" class="nav-link">Home</a>
+                <a href="#" class="nav-link">Data Streams</a>
+                <a href="#" class="nav-link">Archives</a>
+                <a href="#" class="nav-link">New & Popular</a>
             </nav>
             <div class="flex items-center space-x-4 text-gray-300">
                 <i id="search-icon" class="ph ph-magnifying-glass text-xl cursor-pointer hover:text-white transition-colors"></i>
@@ -29,10 +29,8 @@
 
         <!-- Main Content -->
         <main id="main-content">
-            <section id="hero-section" class="h-screen -mt-[72px] md:-mt-[88px] flex items-end p-6 md:p-12 relative text-white">
-                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent"></div>
-                <div class="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent"></div>
-                <img src="https://placehold.co/1920x1080/0c0a09/d946ef?text=SYSTEM_FAILURE" id="hero-bg" class="absolute inset-0 w-full h-full object-cover -z-10 opacity-70" alt="Hero Background">
+            <section id="hero-section" class="h-screen w-screen -mt-[72px] md:-mt-[88px] flex items-end p-6 md:p-12 relative text-white transition-all duration-500">
+                <div id="hero-bg" class="absolute inset-0 w-full h-full -z-10"></div>
                 
                 <div class="relative z-10 w-full md:w-1/2 lg:w-2/5 space-y-4 hero-content">
                     <h2 id="hero-title" class="text-4xl md:text-6xl font-black uppercase tracking-wide font-['Orbitron']">Movie Title</h2>
@@ -59,11 +57,10 @@
     </div>
 
     <!-- Video Player Modal -->
-    <div id="video-modal" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center hidden">
+    <div id="video-modal" class="fixed inset-0 bg-black/90 z-[110] flex items-center justify-center hidden">
         <video id="video-player" class="w-full max-w-6xl aspect-video" controls autoplay></video>
         <button id="close-modal-btn" class="absolute top-5 right-5 text-white text-4xl">&times;</button>
     </div>
-
 
     <script src="script.js"></script>
 </body>

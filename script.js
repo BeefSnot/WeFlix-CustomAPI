@@ -1,18 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
     const API_URL = 'http://localhost:3000/api/movies';
     const movieRowsContainer = document.getElementById('movie-rows-container');
-    const appContainer = document.getElementById('app-container');
-    const header = document.querySelector('header');
     
-    // Video Modal Elements
+    // Hero Section Elements
+    const heroBg = document.getElementById('hero-bg');
+    const heroTitle = document.getElementById('hero-title');
+    const heroDescription = document.getElementById('hero-description');
+    const heroPlayBtn = document.getElementById('hero-play-btn');
+    const heroInfoBtn = document.getElementById('hero-info-btn');
+
+    // Video Player Elements
     const videoModal = document.getElementById('video-modal');
     const videoPlayer = document.getElementById('video-player');
     const closeModalBtn = document.getElementById('close-modal-btn');
-    const mainContent = document.getElementById('main-content');
 
-    let moviesData = []; // Store fetched movies
+    let moviesData = []; 
+    let currentHeroMovie = null;
 
-    // --- VIDEO PLAYER LOGIC ---
+    // --- DYNAMIC HERO LOGIC ---
+    const updateHeroSection = (movie) => {
+        currentHeroMovie = movie;
+        heroBg.style.backgroundImage = `url('${movie.posterUrl || `https://placehold.co/1920x1080/0c0a09/d946ef?text=SYSTEM_FAILURE`}')`;
+        heroTitle.textContent = movie.title;
+        heroDescription.textContent = movie.description;
+    };
+
+    // --- MODAL & PLAYER LOGIC ---
     const openPlayer = (streamUrl) => {
         if (!streamUrl) {
             alert('Video stream for this title is not available.');
@@ -20,12 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         videoPlayer.src = streamUrl;
         videoModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        document.body.style.overflow = 'hidden';
     };
 
     const closePlayer = () => {
         videoPlayer.pause();
-        videoPlayer.src = ''; // Clear source
+        videoPlayer.src = '';
         videoModal.classList.add('hidden');
         document.body.style.overflow = 'auto';
     };
@@ -34,36 +47,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const createMovieCard = (movie) => {
         const card = document.createElement('div');
         card.className = 'movie-card flex-shrink-0 w-40 md:w-60 rounded-lg overflow-hidden cursor-pointer relative aspect-[2/3]';
-        const placeholderImg = `https://placehold.co/400x600/0c0a09/f0abfc?text=${encodeURIComponent(movie.title)}`;
         
+        const poster = movie.posterUrl || `https://placehold.co/400x600/0c0a09/f0abfc?text=${encodeURIComponent(movie.title)}`;
+        const titleContent = movie.titleImageUrl 
+            ? `<img src="${movie.titleImageUrl}" alt="${movie.title} Logo" class="title-logo">`
+            : `<h4 class="font-bold text-lg">${movie.title}</h4>`;
+
         card.innerHTML = `
-            <img src="${placeholderImg}" alt="${movie.title}" class="w-full h-full object-cover">
-            <div class="info-overlay absolute inset-0 p-4 flex flex-col justify-end">
-                <h4 class="font-bold text-lg">${movie.title}</h4>
-                <div class="flex justify-between items-center text-xs text-gray-400 mt-1">
-                    <span>${movie.year}</span>
-                    <span class="flex items-center">
-                        <i class="ph-star-fill text-yellow-400 mr-1"></i> ${movie.rating || 'N/A'}
-                    </span>
-                </div>
+            <img src="${poster}" alt="${movie.title}" class="w-full h-full object-cover">
+            <div class="info-overlay absolute inset-0 p-4">
+                ${titleContent}
             </div>
         `;
 
-        card.addEventListener('click', () => openPlayer(movie.streamUrl));
+        card.addEventListener('click', () => updateHeroSection(movie));
         return card;
     };
-
+    
     const createMovieRow = (title, movies) => {
         const row = document.createElement('div');
         row.className = 'movie-row';
-        
         const scrollContainer = document.createElement('div');
         scrollContainer.className = 'movie-row-scroll flex space-x-4 overflow-x-auto pb-4';
-        
         movies.forEach(movie => {
             scrollContainer.appendChild(createMovieCard(movie));
         });
-
         row.innerHTML = `<h3 class="movie-row-title text-xl md:text-2xl font-bold mb-4">${title}</h3>`;
         row.appendChild(scrollContainer);
         return row;
@@ -84,35 +92,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- EVENT LISTENERS ---
     const setupEventListeners = () => {
-        document.getElementById('hero-play-btn').addEventListener('click', () => {
-            if (moviesData.length > 0) {
-                openPlayer(moviesData[0].streamUrl);
-            }
+        heroPlayBtn.addEventListener('click', () => {
+            if (currentHeroMovie) openPlayer(currentHeroMovie.streamUrl);
         });
-        document.getElementById('hero-info-btn').addEventListener('click', () => alert('Showing more info...'));
+        heroInfoBtn.addEventListener('click', () => {
+            if (currentHeroMovie) alert(`More details for: ${currentHeroMovie.title}`);
+        });
         document.getElementById('search-icon').addEventListener('click', () => alert('Opening search...'));
         document.getElementById('notification-icon').addEventListener('click', () => alert('Showing notifications...'));
-
         closeModalBtn.addEventListener('click', closePlayer);
-        videoModal.addEventListener('click', (e) => {
-            if (e.target === videoModal) {
-                closePlayer();
-            }
-        });
-
-        window.addEventListener('scroll', () => {
-            header.classList.toggle('scrolled', window.scrollY > 50);
-        });
     };
 
     // --- INITIALIZATION LOGIC ---
     const initializePage = async () => {
         moviesData = await fetchMovies(); 
-
         if (moviesData.length > 0) {
-            document.getElementById('hero-title').textContent = moviesData[0].title;
-            document.getElementById('hero-description').textContent = moviesData[0].description || 'No description available.';
-
+            updateHeroSection(moviesData[0]);
             movieRowsContainer.appendChild(createMovieRow('Trending Now', moviesData));
             movieRowsContainer.appendChild(createMovieRow('New Releases', [...moviesData].reverse()));
             movieRowsContainer.appendChild(createMovieRow('Sci-Fi Hits', moviesData.filter(m => m.genre === 'Sci-Fi')));
@@ -128,8 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { threshold: 0.1 });
 
         document.querySelectorAll('.movie-row').forEach(row => observer.observe(row));
-        
-        appContainer.classList.remove('opacity-0');
+        document.getElementById('app-container').classList.remove('opacity-0');
     };
 
     initializePage();

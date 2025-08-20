@@ -8,7 +8,9 @@ const Movie = sequelize.define('Movie', {
   genre: { type: DataTypes.STRING },
   description: { type: DataTypes.TEXT },
   rating: { type: DataTypes.DECIMAL(3,1) },
-  streamUrl: { type: DataTypes.STRING } // New field for the movie URL
+  streamUrl: { type: DataTypes.STRING },
+  posterUrl: { type: DataTypes.STRING },
+  titleImageUrl: { type: DataTypes.STRING } // New field for the title logo
 }, {
   tableName: 'movies',
   timestamps: true
