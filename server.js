@@ -3,7 +3,7 @@
 
 const express = require('express');
 const path = require('path');
-const cors = require('cors'); // Import CORS
+const cors = require('cors');
 const sequelize = require('./db');
 
 // Routers
@@ -19,16 +19,18 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- CORE MIDDLEWARE ---
-app.use(cors()); // Enable CORS for all routes
-app.use(express.json()); // Middleware to parse JSON bodies
-app.use(requestLogger); // Custom request logger
+app.use(cors());
+app.use(express.json());
+app.use(requestLogger);
+
+// Serve static files from the project's root directory
+app.use(express.static(__dirname));
 
 // -------- Swagger Setup --------
 const swaggerSpec = swaggerJsdoc({
     definition: {
         openapi: '3.0.0',
         info: { title: 'WeFlix API', version: '1.0.0', description: 'Movies API with pagination & auth (extensible).' },
-        // ... (rest of your swagger config is fine)
     },
     apis: ['./server.js', './routes/*.js']
 });
@@ -39,34 +41,24 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/auth', authRouter);
 app.use('/api/movies', moviesRouter);
 
-// Health FIRST (move above any catch-all)
-app.get('/__health', (req, res) => res.json({ ok: true }));
+// --- FRONTEND ROUTE ---
+// All other GET requests not handled by the API will serve the main index.html file
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
-// Optional: later add frontend catch-all; TEMP remove to keep API simple
-// app.get('*', (...));
 
-// DB init (define BEFORE usage)
-async function initDatabase() {
-  try {
-    await sequelize.authenticate();
-    console.log('[WeFlix] DB connected');
-  } catch (e) {
-    console.error('[WeFlix] DB connect failed', e);
-  }
-}
+// --- SERVER INITIALIZATION ---
+const startServer = async () => {
+    try {
+        await sequelize.authenticate();
+        console.log('Database connection has been established successfully.');
+        app.listen(PORT, () => {
+            console.log(`🚀 Server is running on http://localhost:${PORT}`);
+        });
+    } catch (error) {
+        console.error('Unable to connect to the database:', error);
+    }
+};
 
-// Export app
-module.exports = app;
-
-// Local dev (only when run directly and not under Unit)
-if (require.main === module && !process.env.UNIT) {
-  (async () => {
-    await initDatabase();
-    app.listen(PORT, () => console.log(`[WeFlix] Dev listening http://localhost:${PORT}`));
-  })();
-}
-
-// NGINX Unit (UNIT=1): just init DB (Unit binds the socket)
-if (process.env.UNIT) {
-  initDatabase();
-}
+startServer();

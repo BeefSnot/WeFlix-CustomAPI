@@ -3,19 +3,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const movieRowsContainer = document.getElementById('movie-rows-container');
     const appContainer = document.getElementById('app-container');
     const header = document.querySelector('header');
+    
+    // Video Modal Elements
+    const videoModal = document.getElementById('video-modal');
+    const videoPlayer = document.getElementById('video-player');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const mainContent = document.getElementById('main-content');
 
-    // --- BUTTON & INTERACTIVE ELEMENT SELECTORS ---
-    const heroPlayButton = document.getElementById('hero-play-btn');
-    const heroInfoButton = document.getElementById('hero-info-btn');
-    const searchIcon = document.getElementById('search-icon');
-    const notificationIcon = document.getElementById('notification-icon');
+    let moviesData = []; // Store fetched movies
+
+    // --- VIDEO PLAYER LOGIC ---
+    const openPlayer = (streamUrl) => {
+        if (!streamUrl) {
+            alert('Video stream for this title is not available.');
+            return;
+        }
+        videoPlayer.src = streamUrl;
+        videoModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    };
+
+    const closePlayer = () => {
+        videoPlayer.pause();
+        videoPlayer.src = ''; // Clear source
+        videoModal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    };
 
     // --- UTILITY FUNCTIONS ---
-
     const createMovieCard = (movie) => {
         const card = document.createElement('div');
         card.className = 'movie-card flex-shrink-0 w-40 md:w-60 rounded-lg overflow-hidden cursor-pointer relative aspect-[2/3]';
-        
         const placeholderImg = `https://placehold.co/400x600/0c0a09/f0abfc?text=${encodeURIComponent(movie.title)}`;
         
         card.innerHTML = `
@@ -30,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
         `;
+
+        card.addEventListener('click', () => openPlayer(movie.streamUrl));
         return card;
     };
 
@@ -63,12 +83,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- EVENT LISTENERS ---
-    
     const setupEventListeners = () => {
-        heroPlayButton.addEventListener('click', () => alert('Playing featured movie!'));
-        heroInfoButton.addEventListener('click', () => alert('Showing more info...'));
-        searchIcon.addEventListener('click', () => alert('Opening search...'));
-        notificationIcon.addEventListener('click', () => alert('Showing notifications...'));
+        document.getElementById('hero-play-btn').addEventListener('click', () => {
+            if (moviesData.length > 0) {
+                openPlayer(moviesData[0].streamUrl);
+            }
+        });
+        document.getElementById('hero-info-btn').addEventListener('click', () => alert('Showing more info...'));
+        document.getElementById('search-icon').addEventListener('click', () => alert('Opening search...'));
+        document.getElementById('notification-icon').addEventListener('click', () => alert('Showing notifications...'));
+
+        closeModalBtn.addEventListener('click', closePlayer);
+        videoModal.addEventListener('click', (e) => {
+            if (e.target === videoModal) {
+                closePlayer();
+            }
+        });
 
         window.addEventListener('scroll', () => {
             header.classList.toggle('scrolled', window.scrollY > 50);
@@ -76,19 +106,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- INITIALIZATION LOGIC ---
-
     const initializePage = async () => {
-        const movies = await fetchMovies();
+        moviesData = await fetchMovies(); 
 
-        if (movies.length > 0) {
-            document.getElementById('hero-title').textContent = movies[0].title;
-            document.getElementById('hero-description').textContent = movies[0].description || 'No description available.';
+        if (moviesData.length > 0) {
+            document.getElementById('hero-title').textContent = moviesData[0].title;
+            document.getElementById('hero-description').textContent = moviesData[0].description || 'No description available.';
 
-            movieRowsContainer.appendChild(createMovieRow('Trending Now', movies));
-            movieRowsContainer.appendChild(createMovieRow('New Releases', [...movies].reverse()));
-            movieRowsContainer.appendChild(createMovieRow('Sci-Fi Hits', movies.filter(m => m.genre === 'Sci-Fi')));
+            movieRowsContainer.appendChild(createMovieRow('Trending Now', moviesData));
+            movieRowsContainer.appendChild(createMovieRow('New Releases', [...moviesData].reverse()));
+            movieRowsContainer.appendChild(createMovieRow('Sci-Fi Hits', moviesData.filter(m => m.genre === 'Sci-Fi')));
         }
-
+        
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {

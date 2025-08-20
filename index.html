@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
-<body class="bg-black text-white font-['Inter']">
+<body class="bg-black text-white font-['Inter'] overflow-hidden">
 
     <div id="app-container" class="opacity-0 transition-opacity duration-1000">
         <!-- Header -->
@@ -27,8 +27,8 @@
             </div>
         </header>
 
-        <!-- Hero Section -->
-        <main>
+        <!-- Main Content -->
+        <main id="main-content">
             <section id="hero-section" class="h-screen -mt-[72px] md:-mt-[88px] flex items-end p-6 md:p-12 relative text-white">
                 <div class="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent"></div>
                 <div class="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent"></div>
@@ -52,12 +52,18 @@
                 </div>
             </section>
 
-            <!-- Movie Rows -->
             <div id="movie-rows-container" class="px-6 md:px-12 pb-12 space-y-12 relative z-20">
                 <!-- Rows will be dynamically inserted here -->
             </div>
         </main>
     </div>
+
+    <!-- Video Player Modal -->
+    <div id="video-modal" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center hidden">
+        <video id="video-player" class="w-full max-w-6xl aspect-video" controls autoplay></video>
+        <button id="close-modal-btn" class="absolute top-5 right-5 text-white text-4xl">&times;</button>
+    </div>
+
 
     <script src="script.js"></script>
 </body>

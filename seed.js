@@ -4,41 +4,13 @@
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const sequelize = require('./db');
-const Film = require('./models/film');
-const Person = require('./models/person');
-const Planet = require('./models/planet');
 const Movie = require('./models/Movie');
 const User = require('./models/User');
 
 const seedDatabase = async () => {
     try {
-        // The { force: true } option will drop all tables and recreate them.
-        // This is useful for development to ensure a clean slate.
         await sequelize.sync({ force: true });
         console.log('Database synced! Tables recreated.');
-
-        // --- CREATE PLANETS ---
-        const tatooine = await Planet.create({ name: 'Tatooine' });
-        const stewjon = await Planet.create({ name: 'Stewjon' });
-        const naboo = await Planet.create({ name: 'Naboo' });
-        console.log('🪐 Planets created!');
-
-        // --- CREATE PEOPLE (CHARACTERS) ---
-        await Person.create({ name: 'Anakin Skywalker', homeworldId: tatooine.id });
-        await Person.create({ name: 'Obi-Wan Kenobi', homeworldId: stewjon.id });
-        await Person.create({ name: 'Padmé Amidala', homeworldId: naboo.id });
-        await Person.create({ name: 'Palpatine', homeworldId: naboo.id });
-        await Person.create({ name: 'Yoda' }); // Homeworld is unknown, so homeworldId will be null
-        console.log('🧑‍🚀 People (characters) created!');
-
-        // --- CREATE FILM ---
-        await Film.create({
-            title: 'Revenge of the Sith',
-            episode_id: 3,
-            director: 'George Lucas',
-            release_date: '2005-05-19'
-        });
-        console.log('🎬 Film created!');
 
         // --- CREATE USERS ---
         await User.create({
@@ -46,19 +18,49 @@ const seedDatabase = async () => {
             passwordHash: await bcrypt.hash('force', 10),
             role: 'user'
         });
-
         await User.create({
             username: 'admin',
             passwordHash: await bcrypt.hash('adminpass', 10),
             role: 'admin'
         });
+        console.log('Users created!');
 
         // --- CREATE MOVIES ---
         await Movie.bulkCreate([
-            { title: 'A New Hope', year: 1977, genre: 'Sci-Fi', rating: 8.6, description: 'Episode IV' },
-            { title: 'The Empire Strikes Back', year: 1980, genre: 'Sci-Fi', rating: 8.8, description: 'Episode V' },
-            { title: 'Return of the Jedi', year: 1983, genre: 'Sci-Fi', rating: 8.3, description: 'Episode VI' }
+            { 
+              title: 'A New Hope', 
+              year: 1977, 
+              genre: 'Sci-Fi', 
+              rating: 8.6, 
+              description: 'Luke Skywalker joins forces with a Jedi Knight, a cocky pilot, a Wookiee and two droids to save the galaxy from the Empire\'s world-destroying battle station.',
+              streamUrl: null // No URL for this one yet
+            },
+            { 
+              title: 'Attack of the Clones', 
+              year: 2002, 
+              genre: 'Sci-Fi', 
+              rating: 6.6, 
+              description: 'Ten years after the initial invasion of Naboo, the galaxy is on the brink of civil war.',
+              streamUrl: 'http://weflix.jameshamby.me/Movies/StarWarsEpisodeII.mp4' 
+            },
+            { 
+              title: 'The Empire Strikes Back', 
+              year: 1980, 
+              genre: 'Sci-Fi', 
+              rating: 8.8, 
+              description: 'After the Rebels are brutally overpowered by the Empire on the ice planet Hoth, Luke Skywalker begins Jedi training with Yoda.',
+              streamUrl: null 
+            },
+            { 
+              title: 'Return of the Jedi', 
+              year: 1983, 
+              genre: 'Sci-Fi', 
+              rating: 8.3, 
+              description: 'After a daring mission to rescue Han Solo from Jabba the Hutt, the Rebels dispatch to Endor to destroy the second Death Star.',
+              streamUrl: null
+            }
         ]);
+        console.log('Movies created!');
 
         console.log('✅ Seeding complete! 🌱');
 

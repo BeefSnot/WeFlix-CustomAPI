@@ -1,7 +1,20 @@
 {
-  "watch": ["server.js", "db.js", "seed.js", "routes/", "models/", "src/"],
+  "watch": [
+    "server.js",
+    "db.js",
+    "seed.js",
+    "routes/",
+    "models/",
+    "src/"
+  ],
   "ext": "js,json",
-  "ignore": ["node_modules/", "public/", "*.test.js"],
+  "ignore": [
+    "node_modules/",
+    "*.test.js",
+    "index.html",
+    "style.css",
+    "script.js"
+  ],
   "verbose": true,
   "exec": "node server.js"
 }

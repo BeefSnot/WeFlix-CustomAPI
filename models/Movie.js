@@ -7,7 +7,8 @@ const Movie = sequelize.define('Movie', {
   year: { type: DataTypes.INTEGER },
   genre: { type: DataTypes.STRING },
   description: { type: DataTypes.TEXT },
-  rating: { type: DataTypes.DECIMAL(3,1) }
+  rating: { type: DataTypes.DECIMAL(3,1) },
+  streamUrl: { type: DataTypes.STRING } // New field for the movie URL
 }, {
   tableName: 'movies',
   timestamps: true
