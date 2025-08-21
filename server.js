@@ -17,6 +17,8 @@ const swaggerJsdoc = require('swagger-jsdoc');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0'; // listen on all interfaces
+app.set('trust proxy', 1);
 
 // --- CORE MIDDLEWARE ---
 app.use(cors());
@@ -44,7 +46,7 @@ app.use('/api/movies', moviesRouter);
 // --- FRONTEND ROUTE ---
 // All other GET requests not handled by the API will serve the main index.html file
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 
@@ -53,8 +55,8 @@ const startServer = async () => {
     try {
         await sequelize.authenticate();
         console.log('Database connection has been established successfully.');
-        app.listen(PORT, () => {
-            console.log(`🚀 Server is running on http://localhost:${PORT}`);
+        app.listen(PORT, HOST, () => {
+            console.log(`🚀 API listening on ${HOST}:${PORT} (proxied at https://weflix.jameshamby.me/api)`);
         });
     } catch (error) {
         console.error('Unable to connect to the database:', error);
