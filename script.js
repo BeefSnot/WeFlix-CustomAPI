@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'http://localhost:3000/api/movies';
+    const API_URL = 'https://weflix.jameshamby.me/api/movies';
     const movieRowsContainer = document.getElementById('movie-rows-container');
     
     // Hero Section Elements
