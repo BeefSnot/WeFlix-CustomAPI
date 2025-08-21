@@ -2,6 +2,7 @@ const express = require('express');
 const Movie = require('../models/Movie');
 const cache = require('../src/middleware/cache');
 const auth = require('../src/middleware/auth');
+const cacheInvalidation = require('../src/middleware/cacheInvalidation');
 const router = express.Router();
 
 /**
@@ -27,7 +28,7 @@ router.get('/', cache(parseInt(process.env.CACHE_TTL_SECONDS) || 30), async (req
  *   get:
  *     summary: Get a movie by id
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', cache(parseInt(process.env.CACHE_TTL_SECONDS) || 30), async (req, res) => {
   const movie = await Movie.findByPk(req.params.id);
   if (!movie) return res.status(404).json({ message: 'Not found' });
   res.json(movie);
@@ -39,7 +40,7 @@ router.get('/:id', async (req, res) => {
  *   post:
  *     summary: Create a movie (auth)
  */
-router.post('/', auth('user'), async (req, res) => {
+router.post('/', cacheInvalidation(), auth('user'), async (req, res) => {
   try {
     const movie = await Movie.create(req.body);
     res.status(201).json(movie);
@@ -54,7 +55,7 @@ router.post('/', auth('user'), async (req, res) => {
  *   put:
  *     summary: Update a movie (auth)
  */
-router.put('/:id', auth('user'), async (req, res) => {
+router.put('/:id', cacheInvalidation(), auth('user'), async (req, res) => {
   const movie = await Movie.findByPk(req.params.id);
   if (!movie) return res.status(404).json({ message: 'Not found' });
   await movie.update(req.body);
@@ -67,7 +68,7 @@ router.put('/:id', auth('user'), async (req, res) => {
  *   delete:
  *     summary: Delete a movie (admin)
  */
-router.delete('/:id', auth('admin'), async (req, res) => {
+router.delete('/:id', cacheInvalidation(), auth('admin'), async (req, res) => {
   const movie = await Movie.findByPk(req.params.id);
   if (!movie) return res.status(404).json({ message: 'Not found' });
   await movie.destroy();
