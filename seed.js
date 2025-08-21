@@ -48,24 +48,24 @@ const seedDatabase = async () => {
               titleImageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Star_Wars_Attack_of_the_Clones_logo.svg/1280px-Star_Wars_Attack_of_the_Clones_logo.svg.png'
             },
             {
-              title: 'A New Hope',
-              year: 1977,
-              genre: 'Sci-Fi',
-              rating: 8.6,
-              description: 'Luke Skywalker joins forces with a Jedi Knight, a cocky pilot, a Wookiee and two droids to save the galaxy from the Empire\'s world-destroying battle station.',
-              streamUrl: null,
-              posterUrl: 'https://m.media-amazon.com/images/M/MV5BOTA5NjhiOTAtZWM0ZC00MWNhLThiM2YtNDI5ZGJiOTNiM2M4XkEyXkFqcGdeQXVyMTA4NDI1NTQx._V1_SX300.jpg',
-              titleImageUrl: `https://placehold.co/300x100/000000/FFFFFF?text=A+New+Hope&font=orbitron`
+              title: 'Joker',
+              year: 2019,
+              genre: 'Drama, Thriller',
+              rating: 8.4,
+              description: 'In 1980s Gotham City, a mentally troubled comedian, Arthur Fleck, is disregarded and mistreated by society. He then embarks on a downward spiral of revolution and bloody crime.',
+              streamUrl: 'https://weflix.jameshamby.me/Movies/Joker.mp4',
+              posterUrl: 'https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWI0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_SX300.jpg',
+              titleImageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/01/Joker_%282019_film%29_logo.svg'
             },
             {
-              title: 'The Empire Strikes Back',
-              year: 1980,
-              genre: 'Sci-Fi',
-              rating: 8.8,
-              description: 'After the Rebels are brutally overpowered by the Empire on the ice planet Hoth, Luke Skywalker begins Jedi training with Yoda.',
-              streamUrl: null,
-              posterUrl: 'https://m.media-amazon.com/images/M/MV5BYmU1NDRjNDgtMzhiMi00NjZmLTg5NGItZDNiZjU5NTU4OTE0XkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg',
-              titleImageUrl: `https://placehold.co/300x100/000000/FFFFFF?text=The+Empire+Strikes+Back&font=orbitron`
+              title: 'Wicked',
+              year: 2024,
+              genre: 'Fantasy, Musical',
+              rating: null,
+              description: 'Elphaba, a young woman, is misunderstood because of her unusual green skin. After meeting Glinda, a popular young woman, their friendship struggles as they see the world from opposite perspectives.',
+              streamUrl: 'https://weflix.jameshamby.me/Movies/Wicked.mp4',
+              posterUrl: 'https://m.media-amazon.com/images/M/MV5BZjQwNmQ2OTYtM2E3NS00M2I1LWE5OTItY2E3N2I0ZDRiMzg5XkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_SX300.jpg',
+              titleImageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Wicked_Movie_Logo.svg/1280px-Wicked_Movie_Logo.svg.png'
             }
         ]);
         console.log('Movies created!');
