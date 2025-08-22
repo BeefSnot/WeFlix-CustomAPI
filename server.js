@@ -14,6 +14,7 @@ const requestLogger = require('./src/middleware/logger');
 // Swagger (auto-generated API docs)
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
+const apicache = require('apicache');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -39,9 +40,33 @@ const swaggerSpec = swaggerJsdoc({
 app.get('/api/docs.json', (req, res) => res.json(swaggerSpec));
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+function cacheGet(ttlSeconds) {
+  const store = new Map();
+  return (req, res, next) => {
+    if (req.method !== 'GET') return next();
+    const key = req.originalUrl;
+    const hit = store.get(key);
+    const now = Date.now();
+    if (hit && hit.expires > now) {
+      res.set('X-Cache', 'HIT');
+      res.set('X-Cache-Remaining', String(Math.max(0, Math.round((hit.expires - now) / 1000))));
+      return res.json(hit.data);
+    }
+    const send = res.json.bind(res);
+    res.json = (body) => {
+      const expires = Date.now() + ttlSeconds * 1000;
+      store.set(key, { data: body, expires });
+      res.set('X-Cache', 'MISS');
+      res.set('X-Cache-Remaining', String(ttlSeconds));
+      return send(body);
+    };
+    next();
+  };
+}
+
 // --- API ROUTERS ---
 app.use('/api/auth', authRouter);
-app.use('/api/movies', moviesRouter);
+app.use('/api/movies', cacheGet(300), moviesRouter);
 
 // --- FRONTEND ROUTE ---
 // All other GET requests not handled by the API will serve the main index.html file
