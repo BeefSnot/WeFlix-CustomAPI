@@ -9,6 +9,7 @@ const sequelize = require('./db');
 // Routers
 const authRouter = require('./routes/auth');
 const moviesRouter = require('./routes/movies');
+const showsRouter = require('./routes/shows'); // add
 // Custom middleware
 const requestLogger = require('./src/middleware/logger');
 // Swagger (auto-generated API docs)
@@ -34,8 +35,88 @@ const swaggerSpec = swaggerJsdoc({
     definition: {
         openapi: '3.0.0',
         info: { title: 'WeFlix API', version: '1.0.0', description: 'Movies API with pagination & auth (extensible).' },
+        servers: [
+          { url: 'https://weflix.jameshamby.me', description: 'Prod' },
+          { url: `http://${HOST}:${PORT}`, description: 'Local' }
+        ],
+        components: {
+          securitySchemes: {
+            bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }
+          },
+          schemas: {
+            Movie: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', example: 1 },
+                title: { type: 'string', example: 'Inception' },
+                description: { type: 'string' },
+                year: { type: 'integer', example: 2010 }
+              },
+              additionalProperties: true
+            },
+            MoviePage: {
+              type: 'object',
+              properties: {
+                data: { type: 'array', items: { $ref: '#/components/schemas/Movie' } },
+                meta: {
+                  type: 'object',
+                  properties: {
+                    page: { type: 'integer', example: 1 },
+                    pageSize: { type: 'integer', example: 10 },
+                    total: { type: 'integer', example: 123 },
+                    totalPages: { type: 'integer', example: 13 }
+                  }
+                }
+              }
+            },
+            ShowItem: {
+              type: 'object',
+              properties: {
+                type: { type: 'string', enum: ['dir', 'file'] },
+                name: { type: 'string' },
+                path: { type: 'string' },
+                size: { type: 'integer', nullable: true },
+                mtime: { type: 'number', nullable: true }
+              }
+            },
+            ShowList: {
+              type: 'object',
+              properties: {
+                dir: { type: 'string' },
+                total: { type: 'integer' },
+                page: { type: 'integer' },
+                limit: { type: 'integer' },
+                items: { type: 'array', items: { $ref: '#/components/schemas/ShowItem' } }
+              }
+            },
+            AuthLoginRequest: {
+              type: 'object',
+              required: ['email', 'password'],
+              properties: {
+                email: { type: 'string', format: 'email' },
+                password: { type: 'string', format: 'password' }
+              }
+            },
+            AuthRegisterRequest: {
+              type: 'object',
+              required: ['username', 'email', 'password'],
+              properties: {
+                username: { type: 'string' },
+                email: { type: 'string', format: 'email' },
+                password: { type: 'string', format: 'password' }
+              }
+            },
+            AuthResponse: {
+              type: 'object',
+              properties: {
+                token: { type: 'string' },
+                user: { type: 'object', additionalProperties: true }
+              }
+            }
+          }
+        }
     },
-    apis: ['./server.js', './routes/*.js']
+    apis: ['./server.js', './routes/*.js', './docs/*.js'] // <— include docs folder
 });
 app.get('/api/docs.json', (req, res) => res.json(swaggerSpec));
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -67,6 +148,7 @@ function cacheGet(ttlSeconds) {
 // --- API ROUTERS ---
 app.use('/api/auth', authRouter);
 app.use('/api/movies', cacheGet(300), moviesRouter);
+app.use('/api/shows', cacheGet(300), showsRouter); // add
 
 // --- FRONTEND ROUTE ---
 // All other GET requests not handled by the API will serve the main index.html file
