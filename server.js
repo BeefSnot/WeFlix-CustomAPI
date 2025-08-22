@@ -119,7 +119,10 @@ const swaggerSpec = swaggerJsdoc({
     apis: ['./server.js', './routes/*.js', './docs/*.js'] // <— include docs folder
 });
 app.get('/api/docs.json', (req, res) => res.json(swaggerSpec));
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  explorer: true,
+  swaggerOptions: { persistAuthorization: true }
+}));
 
 function cacheGet(ttlSeconds) {
   const store = new Map();

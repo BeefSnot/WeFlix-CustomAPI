@@ -34,6 +34,21 @@
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Movie' }
  *       404: { description: Not found }
+ *
+ * /api/movies:
+ *   post:
+ *     tags: [Movies]
+ *     summary: Create a movie
+ *     security: [{ bearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/Movie' }
+ *     responses:
+ *       201: { description: Created }
+ *
+ * /api/movies/{id}:
  *   put:
  *     tags: [Movies]
  *     summary: Update a movie
@@ -62,18 +77,5 @@
  *         schema: { type: integer }
  *     responses:
  *       204: { description: Deleted }
- *
- * /api/movies:
- *   post:
- *     tags: [Movies]
- *     summary: Create a movie
- *     security: [{ bearerAuth: [] }]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema: { $ref: '#/components/schemas/Movie' }
- *     responses:
- *       201: { description: Created }
  */
 module.exports = {};
