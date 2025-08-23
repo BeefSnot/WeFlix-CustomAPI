@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'https://weflix.jameshamby.me/api/movies';
+    const API_URL = 'http://localhost:3000/api/movies';
     const movieRowsContainer = document.getElementById('movie-rows-container');
     
     // Hero Section Elements
@@ -42,6 +42,15 @@ document.addEventListener('DOMContentLoaded', () => {
         videoModal.classList.add('hidden');
         document.body.style.overflow = 'auto';
     };
+    
+    // --- NAVIGATION LOGIC ---
+    const showDetailsPage = (movie) => {
+        // In a real app, this would navigate to a new page like /movie/123
+        // For this presentation, we'll simulate it by changing the URL hash
+        const movieSlug = movie.title.toLowerCase().replace(/ /g, '-');
+        window.location.hash = `#/movie/${movieSlug}`;
+        alert(`Navigating to details page for: ${movie.title}`);
+    };
 
     // --- UTILITY FUNCTIONS ---
     const createMovieCard = (movie) => {
@@ -57,10 +66,31 @@ document.addEventListener('DOMContentLoaded', () => {
             <img src="${poster}" alt="${movie.title}" class="w-full h-full object-cover">
             <div class="info-overlay absolute inset-0 p-4">
                 ${titleContent}
+                <div class="card-actions">
+                    <button class="card-button play-button">
+                        <i class="ph ph-play-fill text-xl"></i>
+                    </button>
+                    <button class="card-button details-button">
+                        <i class="ph ph-info-fill text-xl"></i>
+                    </button>
+                </div>
             </div>
         `;
 
+        // Add event listeners to the new buttons inside the card
+        card.querySelector('.play-button').addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent the hero from updating
+            openPlayer(movie.streamUrl);
+        });
+        
+        card.querySelector('.details-button').addEventListener('click', (e) => {
+            e.stopPropagation();
+            showDetailsPage(movie);
+        });
+
+        // Clicking the card itself still updates the hero
         card.addEventListener('click', () => updateHeroSection(movie));
+        
         return card;
     };
     
@@ -96,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentHeroMovie) openPlayer(currentHeroMovie.streamUrl);
         });
         heroInfoBtn.addEventListener('click', () => {
-            if (currentHeroMovie) alert(`More details for: ${currentHeroMovie.title}`);
+            if (currentHeroMovie) showDetailsPage(currentHeroMovie);
         });
         document.getElementById('search-icon').addEventListener('click', () => alert('Opening search...'));
         document.getElementById('notification-icon').addEventListener('click', () => alert('Showing notifications...'));

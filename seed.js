@@ -43,9 +43,39 @@ const seedDatabase = async () => {
               genre: 'Sci-Fi',
               rating: 6.6,
               description: 'Ten years after the initial invasion of Naboo, the galaxy is on the brink of civil war. Under the leadership of a renegade Jedi named Count Dooku, thousands of solar systems threaten to secede from the Galactic Republic.',
-              streamUrl: 'http://weflix.jameshamby.me/Movies/StarWarsEpisodeII.mp4',
+              streamUrl: 'https://weflix.jameshamby.me/Movies/StarWarsEpisodeII.mp4',
               posterUrl: 'https://m.media-amazon.com/images/M/MV5BMDAzM2M0Y2UtZjRmZi00MzVlLTg4MjEtOTE3NzU5ZDVlMTU5XkEyXkFqcGdeQXVyNDUyOTg3Njg@._V1_SX300.jpg',
               titleImageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Star_Wars_Attack_of_the_Clones_logo.svg/1280px-Star_Wars_Attack_of_the_Clones_logo.svg.png'
+            },
+            {
+              title: 'A New Hope',
+              year: 1977,
+              genre: 'Sci-Fi',
+              rating: 8.6,
+              description: 'Luke Skywalker joins forces with a Jedi Knight, a cocky pilot, a Wookiee and two droids to save the galaxy from the Empire\'s world-destroying battle station.',
+              streamUrl: 'https://weflix.jameshamby.me/Movies/StarWarsEpisodeIV.mp4',
+              posterUrl: 'https://m.media-amazon.com/images/M/MV5BOTA5NjhiOTAtZWM0ZC00MWNhLThiM2YtNDI5ZGJiOTNiM2M4XkEyXkFqcGdeQXVyMTA4NDI1NTQx._V1_SX300.jpg',
+              titleImageUrl: `https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Star_Wars_Logo.svg/1280px-Star_Wars_Logo.svg.png`
+            },
+            {
+              title: 'The Empire Strikes Back',
+              year: 1980,
+              genre: 'Sci-Fi',
+              rating: 8.8,
+              description: 'After the Rebels are brutally overpowered by the Empire on the ice planet Hoth, Luke Skywalker begins Jedi training with Yoda.',
+              streamUrl: 'https://weflix.jameshamby.me/Movies/StarWarsEpisodeV.mp4',
+              posterUrl: 'https://m.media-amazon.com/images/M/MV5BYmU1NDRjNDgtMzhiMi00NjZmLTg5NGItZDNiZjU5NTU4OTE0XkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg',
+              titleImageUrl: `https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Star_Wars_The_Empire_Strikes_Back_logo.svg/1280px-Star_Wars_The_Empire_Strikes_Back_logo.svg.png`
+            },
+            {
+              title: 'Return of the Jedi',
+              year: 1983,
+              genre: 'Sci-Fi',
+              rating: 8.3,
+              description: 'After a daring mission to rescue Han Solo from Jabba the Hutt, the Rebels dispatch to Endor to destroy the second Death Star.',
+              streamUrl: 'https://weflix.jameshamby.me/Movies/StarWarsEpisodeVI.mp4',
+              posterUrl: 'https://m.media-amazon.com/images/M/MV5BOWZlMjFiYzgtMTUzNC00Y2IzLTk1NTMtZmNhMTczNTk0ODk1XkEyXkFqcGdeQXVyNTAyODkwOQ@@._V1_SX300.jpg',
+              titleImageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Star_Wars_Return_of_the_Jedi_logo.svg/1280px-Star_Wars_Return_of_the_Jedi_logo.svg.png'
             },
             {
               title: 'Joker',
