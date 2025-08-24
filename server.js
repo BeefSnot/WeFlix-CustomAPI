@@ -10,6 +10,7 @@ const sequelize = require('./db');
 const authRouter = require('./routes/auth');
 const moviesRouter = require('./routes/movies');
 const showsRouter = require('./routes/shows'); // add
+const streamRouter = require('./routes/stream'); // add
 // Custom middleware
 const requestLogger = require('./src/middleware/logger');
 // Swagger (auto-generated API docs)
@@ -151,7 +152,8 @@ function cacheGet(ttlSeconds) {
 // --- API ROUTERS ---
 app.use('/api/auth', authRouter);
 app.use('/api/movies', cacheGet(300), moviesRouter);
-app.use('/api/shows', cacheGet(300), showsRouter); // add
+app.use('/api/shows', cacheGet(300), showsRouter);
+app.use('/api/stream', streamRouter); // add
 
 // --- FRONTEND ROUTE ---
 // All other GET requests not handled by the API will serve the main index.html file

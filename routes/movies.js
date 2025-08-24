@@ -2,6 +2,7 @@ const express = require('express');
 const Movie = require('../models/Movie');
 const cache = require('../src/middleware/cache');
 const auth = require('../src/middleware/auth');
+const { sign } = require('../src/streamToken');
 const router = express.Router();
 
 /**
@@ -15,10 +16,12 @@ router.get('/', cache(parseInt(process.env.CACHE_TTL_SECONDS) || 30), async (req
   const limit = Math.min(parseInt(req.query.limit) || 10, 50);
   const offset = (page - 1) * limit;
   const { rows, count } = await Movie.findAndCountAll({ limit, offset, order: [['id', 'ASC']] });
-  res.json({
-    data: rows,
-    meta: { page, pageSize: limit, total: count, totalPages: Math.ceil(count / limit) }
+  const data = rows.map(m => {
+    const obj = m.toJSON();
+    obj.streamUrl = `/api/stream/${obj.id}?t=${encodeURIComponent(sign(obj.id))}`;
+    return obj;
   });
+  res.json({ data, meta: { page, pageSize: limit, total: count, totalPages: Math.ceil(count / limit) } });
 });
 
 /**
@@ -30,7 +33,9 @@ router.get('/', cache(parseInt(process.env.CACHE_TTL_SECONDS) || 30), async (req
 router.get('/:id', async (req, res) => {
   const movie = await Movie.findByPk(req.params.id);
   if (!movie) return res.status(404).json({ message: 'Not found' });
-  res.json(movie);
+  const obj = movie.toJSON();
+  obj.streamUrl = `/api/stream/${obj.id}?t=${encodeURIComponent(sign(obj.id))}`;
+  res.json(obj);
 });
 
 /**
