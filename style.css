@@ -1,4 +1,4 @@
-/* --- WEFLIX CYBERPUNK THEME V1.1 --- */
+/* --- WEFLIX CYBERPUNK THEME FINAL --- */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Orbitron:wght@700;900&display=swap');
 
@@ -106,7 +106,7 @@ header.scrolled {
 .movie-card .info-overlay {
     opacity: 0;
     transition: opacity 0.3s ease;
-    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -120,10 +120,48 @@ header.scrolled {
 
 .title-logo {
     width: 85%;
-    max-height: 120px;
+    max-height: 80px;
     object-fit: contain;
     margin-bottom: 1rem;
     filter: drop-shadow(0 0 5px rgba(255,255,255,0.7));
+    transition: all 0.3s ease;
+}
+
+.movie-card:hover .title-logo {
+    transform: translateY(-20px);
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s ease 0.1s;
+}
+
+.movie-card:hover .card-actions {
+    opacity: 1;
+}
+
+.card-button {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.card-button:hover {
+    background: #d946ef;
+    border-color: #f0abfc;
 }
 
 /* --- Animations & Video Player --- */
