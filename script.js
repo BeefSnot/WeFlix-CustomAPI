@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'https://weflix.jameshamby.me/api/movies';
+    // Always hit the current origin behind your proxy (https://weflix.media/api/movies)
+    const API_URL = 'https://weflix.media/api/movies';
     const movieRowsContainer = document.getElementById('movie-rows-container');
-    
+
     // Hero Section Elements
     const heroBg = document.getElementById('hero-bg');
     const heroTitle = document.getElementById('hero-title');
@@ -14,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const videoPlayer = document.getElementById('video-player');
     const closeModalBtn = document.getElementById('close-modal-btn');
 
-    let moviesData = []; 
+    let moviesData = [];
     let currentHeroMovie = null;
 
     // --- DYNAMIC HERO LOGIC ---
@@ -47,9 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const createMovieCard = (movie) => {
         const card = document.createElement('div');
         card.className = 'movie-card flex-shrink-0 w-40 md:w-60 rounded-lg overflow-hidden cursor-pointer relative aspect-[2/3]';
-        
+
         const poster = movie.posterUrl || `https://placehold.co/400x600/0c0a09/f0abfc?text=${encodeURIComponent(movie.title)}`;
-        const titleContent = movie.titleImageUrl 
+        const titleContent = movie.titleImageUrl
             ? `<img src="${movie.titleImageUrl}" alt="${movie.title} Logo" class="title-logo">`
             : `<h4 class="font-bold text-lg">${movie.title}</h4>`;
 
@@ -63,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.addEventListener('click', () => updateHeroSection(movie));
         return card;
     };
-    
+
     const createMovieRow = (title, movies) => {
         const row = document.createElement('div');
         row.className = 'movie-row';
@@ -105,14 +106,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INITIALIZATION LOGIC ---
     const initializePage = async () => {
-        moviesData = await fetchMovies(); 
+        moviesData = await fetchMovies();
         if (moviesData.length > 0) {
             updateHeroSection(moviesData[0]);
             movieRowsContainer.appendChild(createMovieRow('Trending Now', moviesData));
             movieRowsContainer.appendChild(createMovieRow('New Releases', [...moviesData].reverse()));
             movieRowsContainer.appendChild(createMovieRow('Sci-Fi Hits', moviesData.filter(m => m.genre === 'Sci-Fi')));
         }
-        
+
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {

@@ -36,116 +36,116 @@ const swaggerSpec = swaggerJsdoc({
         openapi: '3.0.0',
         info: { title: 'WeFlix API', version: '1.0.0', description: 'Movies API with pagination & auth (extensible).' },
         servers: [
-          { url: 'https://weflix.jameshamby.me', description: 'Prod' },
-          { url: `http://${HOST}:${PORT}`, description: 'Local' }
+            { url: 'https://weflix.media', description: 'Prod' },
+            { url: `http://${HOST}:${PORT}`, description: 'Local' }
         ],
         components: {
-          securitySchemes: {
-            bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }
-          },
-          schemas: {
-            Movie: {
-              type: 'object',
-              properties: {
-                id: { type: 'integer', example: 1 },
-                title: { type: 'string', example: 'Inception' },
-                description: { type: 'string' },
-                year: { type: 'integer', example: 2010 }
-              },
-              additionalProperties: true
+            securitySchemes: {
+                bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }
             },
-            MoviePage: {
-              type: 'object',
-              properties: {
-                data: { type: 'array', items: { $ref: '#/components/schemas/Movie' } },
-                meta: {
-                  type: 'object',
-                  properties: {
-                    page: { type: 'integer', example: 1 },
-                    pageSize: { type: 'integer', example: 10 },
-                    total: { type: 'integer', example: 123 },
-                    totalPages: { type: 'integer', example: 13 }
-                  }
+            schemas: {
+                Movie: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'integer', example: 1 },
+                        title: { type: 'string', example: 'Inception' },
+                        description: { type: 'string' },
+                        year: { type: 'integer', example: 2010 }
+                    },
+                    additionalProperties: true
+                },
+                MoviePage: {
+                    type: 'object',
+                    properties: {
+                        data: { type: 'array', items: { $ref: '#/components/schemas/Movie' } },
+                        meta: {
+                            type: 'object',
+                            properties: {
+                                page: { type: 'integer', example: 1 },
+                                pageSize: { type: 'integer', example: 10 },
+                                total: { type: 'integer', example: 123 },
+                                totalPages: { type: 'integer', example: 13 }
+                            }
+                        }
+                    }
+                },
+                ShowItem: {
+                    type: 'object',
+                    properties: {
+                        type: { type: 'string', enum: ['dir', 'file'] },
+                        name: { type: 'string' },
+                        path: { type: 'string' },
+                        size: { type: 'integer', nullable: true },
+                        mtime: { type: 'number', nullable: true }
+                    }
+                },
+                ShowList: {
+                    type: 'object',
+                    properties: {
+                        dir: { type: 'string' },
+                        total: { type: 'integer' },
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        items: { type: 'array', items: { $ref: '#/components/schemas/ShowItem' } }
+                    }
+                },
+                AuthLoginRequest: {
+                    type: 'object',
+                    required: ['email', 'password'],
+                    properties: {
+                        email: { type: 'string', format: 'email' },
+                        password: { type: 'string', format: 'password' }
+                    }
+                },
+                AuthRegisterRequest: {
+                    type: 'object',
+                    required: ['username', 'email', 'password'],
+                    properties: {
+                        username: { type: 'string' },
+                        email: { type: 'string', format: 'email' },
+                        password: { type: 'string', format: 'password' }
+                    }
+                },
+                AuthResponse: {
+                    type: 'object',
+                    properties: {
+                        token: { type: 'string' },
+                        user: { type: 'object', additionalProperties: true }
+                    }
                 }
-              }
-            },
-            ShowItem: {
-              type: 'object',
-              properties: {
-                type: { type: 'string', enum: ['dir', 'file'] },
-                name: { type: 'string' },
-                path: { type: 'string' },
-                size: { type: 'integer', nullable: true },
-                mtime: { type: 'number', nullable: true }
-              }
-            },
-            ShowList: {
-              type: 'object',
-              properties: {
-                dir: { type: 'string' },
-                total: { type: 'integer' },
-                page: { type: 'integer' },
-                limit: { type: 'integer' },
-                items: { type: 'array', items: { $ref: '#/components/schemas/ShowItem' } }
-              }
-            },
-            AuthLoginRequest: {
-              type: 'object',
-              required: ['email', 'password'],
-              properties: {
-                email: { type: 'string', format: 'email' },
-                password: { type: 'string', format: 'password' }
-              }
-            },
-            AuthRegisterRequest: {
-              type: 'object',
-              required: ['username', 'email', 'password'],
-              properties: {
-                username: { type: 'string' },
-                email: { type: 'string', format: 'email' },
-                password: { type: 'string', format: 'password' }
-              }
-            },
-            AuthResponse: {
-              type: 'object',
-              properties: {
-                token: { type: 'string' },
-                user: { type: 'object', additionalProperties: true }
-              }
             }
-          }
         }
     },
     apis: ['./server.js', './routes/*.js', './docs/*.js'] // <— include docs folder
 });
 app.get('/api/docs.json', (req, res) => res.json(swaggerSpec));
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  explorer: true,
-  swaggerOptions: { persistAuthorization: true }
+    explorer: true,
+    swaggerOptions: { persistAuthorization: true }
 }));
 
 function cacheGet(ttlSeconds) {
-  const store = new Map();
-  return (req, res, next) => {
-    if (req.method !== 'GET') return next();
-    const key = req.originalUrl;
-    const hit = store.get(key);
-    const now = Date.now();
-    if (hit && hit.expires > now) {
-      res.set('X-Cache', 'HIT');
-      res.set('X-Cache-Remaining', String(Math.max(0, Math.round((hit.expires - now) / 1000))));
-      return res.json(hit.data);
-    }
-    const send = res.json.bind(res);
-    res.json = (body) => {
-      const expires = Date.now() + ttlSeconds * 1000;
-      store.set(key, { data: body, expires });
-      res.set('X-Cache', 'MISS');
-      res.set('X-Cache-Remaining', String(ttlSeconds));
-      return send(body);
+    const store = new Map();
+    return (req, res, next) => {
+        if (req.method !== 'GET') return next();
+        const key = req.originalUrl;
+        const hit = store.get(key);
+        const now = Date.now();
+        if (hit && hit.expires > now) {
+            res.set('X-Cache', 'HIT');
+            res.set('X-Cache-Remaining', String(Math.max(0, Math.round((hit.expires - now) / 1000))));
+            return res.json(hit.data);
+        }
+        const send = res.json.bind(res);
+        res.json = (body) => {
+            const expires = Date.now() + ttlSeconds * 1000;
+            store.set(key, { data: body, expires });
+            res.set('X-Cache', 'MISS');
+            res.set('X-Cache-Remaining', String(ttlSeconds));
+            return send(body);
+        };
+        next();
     };
-    next();
-  };
 }
 
 // --- API ROUTERS ---
@@ -166,7 +166,7 @@ const startServer = async () => {
         await sequelize.authenticate();
         console.log('Database connection has been established successfully.');
         app.listen(PORT, HOST, () => {
-            console.log(`🚀 API listening on ${HOST}:${PORT} (proxied at https://weflix.jameshamby.me/api)`);
+            console.log(`🚀 API listening on ${HOST}:${PORT} (proxied at https://weflix.media/api)`);
         });
     } catch (error) {
         console.error('Unable to connect to the database:', error);
