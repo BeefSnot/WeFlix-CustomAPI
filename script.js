@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add event listeners to the new buttons inside the card
         card.querySelector('.play-button').addEventListener('click', (e) => {
             e.stopPropagation(); // Prevent the hero from updating
-            openPlayer(movie.streamUrl);
+            playById(movie.id); // fresh token
         });
         
         card.querySelector('.details-button').addEventListener('click', (e) => {
@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- EVENT LISTENERS ---
     const setupEventListeners = () => {
         heroPlayBtn.addEventListener('click', () => {
-            if (currentHeroMovie) openPlayer(currentHeroMovie.streamUrl);
+            if (currentHeroMovie) playById(currentHeroMovie.id); // fresh token
         });
         heroInfoBtn.addEventListener('click', () => {
             if (currentHeroMovie) showDetailsPage(currentHeroMovie);
@@ -158,4 +158,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initializePage();
     setupEventListeners();
+
+    window.playById = async function(id) {
+        try {
+            const res = await fetch(`/api/movies/${id}`);
+            if (!res.ok) throw new Error('Failed to get stream URL');
+            const movie = await res.json();
+            if (!movie.streamUrl) throw new Error('No stream URL');
+            openPlayer(movie.streamUrl); // uses your existing modal/video element
+        } catch (e) {
+            alert('Video stream for this title is not available.');
+            console.error(e);
+        }
+    };
 });
