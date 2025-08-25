@@ -9,10 +9,11 @@ const sequelize = require('./db');
 // Routers
 const authRouter = require('./routes/auth');
 const moviesRouter = require('./routes/movies');
-const showsRouter = require('./routes/shows'); // add
+const showsRouter = require('./routes/shows');
 const streamRouter = require('./routes/stream'); // add
 // Custom middleware
 const requestLogger = require('./src/middleware/logger');
+const cache = require('./src/middleware/cache');
 // Swagger (auto-generated API docs)
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
@@ -151,9 +152,10 @@ function cacheGet(ttlSeconds) {
 
 // --- API ROUTERS ---
 app.use('/api/auth', authRouter);
-app.use('/api/movies', cacheGet(300), moviesRouter);
-app.use('/api/shows', cacheGet(300), showsRouter);
-app.use('/api/stream', streamRouter); // add
+// Replace cacheGet(300) with Redis-backed cache (TTL from env, default 60s)
+app.use('/api/movies', cache(parseInt(process.env.CACHE_TTL_SECONDS || '60', 10)), moviesRouter);
+app.use('/api/shows',  cache(parseInt(process.env.SHOWS_CACHE_TTL || '300', 10)), showsRouter);
+app.use('/api/stream', streamRouter); // do NOT cache streams
 
 // --- FRONTEND ROUTE ---
 // All other GET requests not handled by the API will serve the main index.html file
