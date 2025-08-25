@@ -21,11 +21,22 @@
                 <a href="#" class="nav-link">New & Popular</a>
                 <a id="admin-link" href="/admin.html" class="nav-link hidden">Admin</a>
             </nav>
-            <div class="flex items-center space-x-4 text-gray-300">
+            <div class="flex items-center space-x-4 text-gray-300 relative">
                 <span id="user-badge" class="text-xs md:text-sm text-fuchsia-300 hidden"></span>
                 <i id="search-icon" class="ph ph-magnifying-glass text-xl cursor-pointer hover:text-white transition-colors"></i>
                 <i id="notification-icon" class="ph ph-bell text-xl cursor-pointer hover:text-white transition-colors"></i>
-                <img src="https://placehold.co/40x40/d946ef/0c0a09?text=V" alt="User Profile" class="w-8 h-8 rounded-full border-2 border-transparent hover:border-fuchsia-500 transition-all">
+                <img id="profile-avatar" src="https://placehold.co/40x40/d946ef/0c0a09?text=V" alt="User Profile" class="w-8 h-8 rounded-full border-2 border-transparent hover:border-fuchsia-500 transition-all cursor-pointer">
+                <div id="profile-menu" class="hidden absolute right-0 top-10 bg-black/80 border border-white/10 rounded-md p-3 w-48 text-sm">
+                    <div id="menu-guest" class="space-y-2">
+                        <a href="/login.html" class="block hover:text-white">Login</a>
+                        <a href="/register.html" class="block hover:text-white">Register</a>
+                    </div>
+                    <div id="menu-user" class="hidden space-y-2">
+                        <div id="menu-username" class="text-fuchsia-300"></div>
+                        <a id="menu-admin" href="/admin.html" class="hidden block hover:text-white">Admin</a>
+                        <button id="menu-logout" class="block w-full text-left hover:text-white">Logout</button>
+                    </div>
+                </div>
             </div>
         </header>
 

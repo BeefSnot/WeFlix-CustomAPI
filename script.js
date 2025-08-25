@@ -171,4 +171,65 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(e);
         }
     };
+
+    // Show logged-in user in header and toggle Admin link
+    (function showUserBadge() {
+        try {
+            const raw = localStorage.getItem('weflix.jwt');
+            if (!raw) return;
+            const payload = JSON.parse(atob(raw.split('.')[1]));
+            const now = Math.floor(Date.now() / 1000);
+            if (payload.exp && payload.exp < now) return;
+            const badge = document.getElementById('user-badge');
+            const adminLink = document.getElementById('admin-link');
+            if (badge) {
+                badge.textContent = `Logged in: ${payload.username} (${payload.role})`;
+                badge.classList.remove('hidden');
+            }
+            if (adminLink && payload.role === 'admin') adminLink.classList.remove('hidden');
+        } catch { /* ignore */ }
+    })();
+
+    const avatar = document.getElementById('profile-avatar');
+    const menu = document.getElementById('profile-menu');
+    const guest = document.getElementById('menu-guest');
+    const userMenu = document.getElementById('menu-user');
+    const userName = document.getElementById('menu-username');
+    const adminLink = document.getElementById('menu-admin');
+    const logoutBtn = document.getElementById('menu-logout');
+
+    function readJwt() {
+        try { const raw = localStorage.getItem('weflix.jwt'); if (!raw) return null; return JSON.parse(atob(raw.split('.')[1])); } catch { return null; }
+    }
+    function refreshUserUI() {
+        const p = readJwt();
+        const badge = document.getElementById('user-badge');
+        const isValid = p && (!p.exp || p.exp > (Date.now() / 1000));
+        if (isValid) {
+          guest.classList.add('hidden'); userMenu.classList.remove('hidden');
+          userName.textContent = `${p.username} (${p.role})`;
+          if (badge) { badge.textContent = `Logged in: ${p.username} (${p.role})`; badge.classList.remove('hidden'); }
+          if (p.role === 'admin') adminLink.classList.remove('hidden'); else adminLink.classList.add('hidden');
+        } else {
+          userMenu.classList.add('hidden'); guest.classList.remove('hidden');
+          adminLink.classList.add('hidden');
+          if (badge) badge.classList.add('hidden');
+        }
+      }
+      refreshUserUI();
+
+    avatar && avatar.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menu.classList.toggle('hidden');
+    });
+    document.addEventListener('click', (e) => {
+        if (!menu.contains(e.target)) menu.classList.add('hidden');
+    });
+    logoutBtn && logoutBtn.addEventListener('click', async () => {
+        try { await fetch('/api/auth/logout', { method: 'POST' }); } catch {}
+        localStorage.removeItem('weflix.jwt');
+        refreshUserUI();
+        menu.classList.add('hidden');
+        location.reload();
+    });
 });

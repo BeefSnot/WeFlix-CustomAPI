@@ -11,10 +11,11 @@
 <body class="bg-black text-white font-['Inter'] overflow-x-hidden">
   <header class="fixed top-0 left-0 right-0 z-50 p-4 md:p-6 flex justify-between items-center">
     <a href="/" class="weflix-logo text-2xl md:text-3xl font-black tracking-wider uppercase no-underline">WEFLIX</a>
-    <div class="text-sm text-gray-300 flex items-center gap-4">
+    <nav class="flex items-center gap-4 text-sm text-gray-300">
+      <a href="/" class="nav-link">Home</a>
       <span id="whoami"></span>
       <button id="logout-btn" class="cyber-button py-1 px-3 rounded">Logout</button>
-    </div>
+    </nav>
   </header>
 
   <main class="pt-28 px-6 md:px-12 pb-16 space-y-10">
@@ -33,11 +34,16 @@
             <input id="m-titleimg" class="px-3 py-2 bg-black/40 border border-white/10 rounded" placeholder="Title Image URL">
           </div>
           <textarea id="m-desc" rows="3" class="w-full px-3 py-2 bg-black/40 border border-white/10 rounded" placeholder="Description"></textarea>
-          <div class="flex gap-3">
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+            <input id="m-stream" class="px-3 py-2 bg-black/40 border border-white/10 rounded" placeholder="Stream Source (http(s) or absolute file path)">
+            <label class="flex items-center gap-2 text-sm text-gray-300">
+              <input id="persist-seed" type="checkbox" class="accent-fuchsia-500">
+              Persist this movie to seeds
+            </label>
             <button class="cyber-button primary px-4 py-2 rounded" id="save-btn" type="submit">Save</button>
-            <button class="cyber-button px-4 py-2 rounded" id="reset-btn" type="button">Reset</button>
           </div>
-          <p class="text-xs text-gray-400 mt-2">Note: Stream source is configured server-side only.</p>
+          <p class="text-xs text-gray-400 mt-2">Note: Stream source is stored server-side.</p>
         </form>
 
         <div class="bg-white/5 border border-white/10 rounded-xl p-5">

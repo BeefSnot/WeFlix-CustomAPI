@@ -8,6 +8,8 @@ const sequelize = require('./db');
 const Movie = require('./models/Movie');
 const User = require('./models/User');
 const { setAll } = require('./src/streamsStore'); // writes data/streams.json
+const fs = require('fs');
+const path = require('path');
 
 const seedDatabase = async () => {
   try {
@@ -102,13 +104,25 @@ const seedDatabase = async () => {
       }
     ];
 
+    // Load extra seeds persisted by admin (if any)
+    let extraSeeds = [];
+    try {
+      const extraPath = path.join(__dirname, 'data', 'seeds.extra.json');
+      extraSeeds = JSON.parse(fs.readFileSync(extraPath, 'utf8'));
+      console.log(`Loaded ${extraSeeds.length} extra seed(s).`);
+    } catch { /* none */ }
+
+    // Merge by title (base seeds win if duplicate)
+    const baseTitles = new Set(seeds.map(s => s.title));
+    const mergedSeeds = seeds.concat((extraSeeds || []).filter(s => s && s.title && !baseTitles.has(s.title)));
+
     // Insert movies without streamUrl (keep _src private)
-    await Movie.bulkCreate(seeds.map(({ _src, ...rest }) => rest));
+    await Movie.bulkCreate(mergedSeeds.map(({ _src, ...rest }) => rest));
     console.log('Movies created!');
 
     // Build id → source map (server-only)
     const movies = await Movie.findAll({ attributes: ['id', 'title'] });
-    const srcByTitle = Object.fromEntries(seeds.map(s => [s.title, s._src]));
+    const srcByTitle = Object.fromEntries(mergedSeeds.map(s => [s.title, s._src]));
     const map = {};
     for (const m of movies) {
       const src = srcByTitle[m.title];

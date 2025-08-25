@@ -12,6 +12,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret';
  *   post:
  *     summary: Login and receive JWT
  */
+const COOKIE_OPTS = {
+  httpOnly: true,
+  sameSite: 'lax',
+  secure: process.env.NODE_ENV === 'production',
+  path: '/',
+};
+
 router.post('/login', async (req, res) => {
   const { username, password } = req.body || {};
   if (!username || !password) return res.status(400).json({ message: 'Missing credentials' });
@@ -20,7 +27,8 @@ router.post('/login', async (req, res) => {
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
   const token = jwt.sign({ sub: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
-  res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
+  res.cookie('jwt', token, { ...COOKIE_OPTS, maxAge: 3600_000 });
+  return res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
 });
 
 /**
@@ -40,7 +48,8 @@ router.post('/register', async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await User.create({ username, passwordHash, role: 'user' });
     const token = jwt.sign({ sub: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
-    res.status(201).json({ token, user: { id: user.id, username: user.username, role: user.role } });
+    res.cookie('jwt', token, { ...COOKIE_OPTS, maxAge: 3600_000 });
+    return res.status(201).json({ token, user: { id: user.id, username: user.username, role: user.role } });
   } catch (e) {
     res.status(500).json({ message: 'Registration failed' });
   }
@@ -54,6 +63,11 @@ router.post('/register', async (req, res) => {
  */
 router.get('/me', auth(), async (req, res) => {
   res.json({ user: req.user });
+});
+
+router.post('/logout', (req, res) => {
+  res.clearCookie('jwt', COOKIE_OPTS);
+  res.status(204).end();
 });
 
 module.exports = router;

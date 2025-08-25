@@ -11,6 +11,11 @@ const authRouter = require('./routes/auth');
 const moviesRouter = require('./routes/movies');
 const showsRouter = require('./routes/shows');
 const streamRouter = require('./routes/stream'); // add
+// Make adminUsers optional
+let adminUsersRouter;
+try { adminUsersRouter = require('./routes/adminUsers'); } catch { adminUsersRouter = null; }
+const adminStreamsRouter = require('./routes/adminStreams');
+const adminSeedsRouter = require('./routes/adminSeeds');
 // Custom middleware
 const requestLogger = require('./src/middleware/logger');
 const cache = require('./src/middleware/cache');
@@ -18,6 +23,8 @@ const cache = require('./src/middleware/cache');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const apicache = require('apicache');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,6 +35,24 @@ app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json());
 app.use(requestLogger);
+app.use(cookieParser()); // <-- add
+
+// Gate admin.html BEFORE static
+app.get('/admin.html', (req, res) => {
+  const token =
+    (req.cookies && req.cookies.jwt) ||
+    (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')
+      ? req.headers.authorization.split(' ')[1]
+      : null);
+  try {
+    if (!token) throw new Error('no token');
+    const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret');
+    if (payload.role !== 'admin') throw new Error('not admin');
+    return res.sendFile(path.join(__dirname, 'admin.html'));
+  } catch {
+    return res.redirect('/login.html');
+  }
+});
 
 // Serve static files from the project's root directory
 app.use(express.static(__dirname));
@@ -152,10 +177,12 @@ function cacheGet(ttlSeconds) {
 
 // --- API ROUTERS ---
 app.use('/api/auth', authRouter);
-// Replace cacheGet(300) with Redis-backed cache (TTL from env, default 60s)
 app.use('/api/movies', cache(parseInt(process.env.CACHE_TTL_SECONDS || '60', 10)), moviesRouter);
 app.use('/api/shows',  cache(parseInt(process.env.SHOWS_CACHE_TTL || '300', 10)), showsRouter);
-app.use('/api/stream', streamRouter); // do NOT cache streams
+app.use('/api/stream', streamRouter);
+app.use('/api/admin/streams', adminStreamsRouter);
+app.use('/api/admin/seeds', adminSeedsRouter);
+if (adminUsersRouter) app.use('/api/admin/users', adminUsersRouter); // optional
 
 // --- FRONTEND ROUTE ---
 // All other GET requests not handled by the API will serve the main index.html file
