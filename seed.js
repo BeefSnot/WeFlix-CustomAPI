@@ -68,7 +68,7 @@ const seedDatabase = async () => {
         genre: 'Sci-Fi',
         rating: 8.8,
         description: 'After the Rebels are brutally overpowered by the Empire on the ice planet Hoth, Luke Skywalker begins Jedi training with Yoda.',
-        _src: 'https://weflix.media/Movies/Star_Wars_The_Empire_Strikes_Back_logo.mp4',
+        _src: 'https://weflix.media/Movies/StarWarsEpisodeV.mp4',
         posterUrl: 'https://m.media-amazon.com/images/M/MV5BYmU1NDRjNDgtMzhiMi00NjZmLTg5NGItZDNiZjU5NTU4OTE0XkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg',
         titleImageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Star_Wars_The_Empire_Strikes_Back_logo.svg/1280px-Star_Wars_The_Empire_Strikes_Back_logo.svg.png'
       },
@@ -116,20 +116,9 @@ const seedDatabase = async () => {
     const baseTitles = new Set(seeds.map(s => s.title));
     const mergedSeeds = seeds.concat((extraSeeds || []).filter(s => s && s.title && !baseTitles.has(s.title)));
 
-    // Insert movies without streamUrl (keep _src private)
-    await Movie.bulkCreate(mergedSeeds.map(({ _src, ...rest }) => rest));
-    console.log('Movies created!');
-
-    // Build id → source map (server-only)
-    const movies = await Movie.findAll({ attributes: ['id', 'title'] });
-    const srcByTitle = Object.fromEntries(mergedSeeds.map(s => [s.title, s._src]));
-    const map = {};
-    for (const m of movies) {
-      const src = srcByTitle[m.title];
-      if (src) map[m.id] = src;
-    }
-    setAll(map);
-    console.log('Stream map saved for', Object.keys(map).length, 'movies');
+  // Insert movies WITH streamUrl (store _src in streamUrl field)
+  await Movie.bulkCreate(mergedSeeds.map(({ _src, ...rest }) => ({ ...rest, streamUrl: _src })));
+  console.log('Movies created!');
 
     console.log('✅ Seeding complete! 🌱');
   } catch (error) {
